@@ -26,26 +26,33 @@ app.get("/api/hello", function (req, res) {
 
 
 app.get("/api/:date?", function (req, res) {
-  let dateParam = req.params.date;
+  let date = req.params.date;
+  let unixDate
+  let dateObj
+  let utcdate
 
-  // If no date provided, use current time
-  if (!dateParam) {
-    dateParam = new Date();
-  } else {
-    // Parse the provided date
-    dateParam = new Date(dateParam);
+  let isunix = /^\d+$/.test(date)
+
+  if(!date) {
+    dateObj = new Date()
+  }
+  if ( date && isunix) {
+    unixDate = parseInt(date)
+    dateObj = new Date(unixDate)
+  }
+  
+  else if(date && !isunix) {
+    dateObj = new Date(date)
   }
 
-  // Check if date is valid
-  if (isNaN(dateParam)) {
-    return res.json({ error: "Invalid Date" });
+  if(dateObj.toString() == "Invalid Date") {
+    res.json({error:"Invalid Date"})
   }
-
-  // Return JSON object with unix and utc keys
-  res.json({
-    unix: dateParam.getTime(),
-    utc: dateParam.toUTCString()
-  });
+  
+  utcdate = dateObj.toUTCString() 
+  unixDate = dateObj.getTime()
+  res.json({ unix: unixDate, utc:utcdate })
+  return
 })
 
 // Listen on port set in environment variable or default to 3000
